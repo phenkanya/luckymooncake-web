@@ -7,6 +7,7 @@ export async function addProduct(formData: FormData) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const priceStr = formData.get("price") as string;
+    const costStr = formData.get("cost") as string;
     const imageUrl = formData.get("imageUrl") as string;
 
     if (!name || !priceStr) {
@@ -14,12 +15,14 @@ export async function addProduct(formData: FormData) {
     }
 
     const price = parseFloat(priceStr);
+    const cost = costStr ? parseFloat(costStr) : 0;
 
     await prisma.product.create({
         data: {
             name,
             description,
             price,
+            cost,
             imageUrl: imageUrl || null,
             isActive: true, // Default to active
         },
@@ -48,6 +51,7 @@ export async function updateProduct(formData: FormData) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const priceStr = formData.get("price") as string;
+    const costStr = formData.get("cost") as string;
     const imageUrl = formData.get("imageUrl") as string;
 
     if (!id || !name || !priceStr) {
@@ -55,6 +59,7 @@ export async function updateProduct(formData: FormData) {
     }
 
     const price = parseFloat(priceStr);
+    const cost = costStr ? parseFloat(costStr) : 0;
 
     await prisma.product.update({
         where: { id },
@@ -62,6 +67,7 @@ export async function updateProduct(formData: FormData) {
             name,
             description,
             price,
+            cost,
             imageUrl: imageUrl || null,
         },
     });

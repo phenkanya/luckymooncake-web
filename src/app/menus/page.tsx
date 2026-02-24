@@ -27,10 +27,10 @@ export default async function MenusPage() {
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>
-                            <TableHead className="w-[80px]">รูปภาพ</TableHead>
                             <TableHead>ชื่อเมนู</TableHead>
-                            <TableHead>รายละเอียด</TableHead>
-                            <TableHead className="text-right">ราคา</TableHead>
+                            <TableHead className="text-right">ต้นทุน</TableHead>
+                            <TableHead className="text-right">ราคาขาย</TableHead>
+                            <TableHead className="text-right">กำไรต่อชิ้น</TableHead>
                             <TableHead className="text-right">จัดการ</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -44,19 +44,15 @@ export default async function MenusPage() {
                         ) : (
                             products.map((product) => (
                                 <TableRow key={product.id} className="hover:bg-muted/30">
-                                    <TableCell>
-                                        {product.imageUrl ? (
-                                            <div className="w-10 h-10 rounded bg-muted bg-cover bg-center" style={{ backgroundImage: `url(${product.imageUrl})` }} />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">ไม่มีรูป</div>
-                                        )}
-                                    </TableCell>
                                     <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">
-                                        {product.description || "-"}
+                                    <TableCell className="text-right text-muted-foreground">
+                                        ฿{(product.cost || 0).toFixed(2)}
+                                    </TableCell>
+                                    <TableCell className="text-right font-medium text-blue-600 dark:text-blue-400">
+                                        ฿{product.price.toFixed(2)}
                                     </TableCell>
                                     <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">
-                                        ฿{product.price.toFixed(2)}
+                                        ฿{(product.price - (product.cost || 0)).toFixed(2)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">

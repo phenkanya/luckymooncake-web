@@ -19,7 +19,7 @@ export default async function StockPage() {
         where: { isActive: true },
         orderBy: { name: 'asc' },
         include: {
-            stockEntries: true
+            stock: true
         }
     });
 
@@ -45,7 +45,7 @@ export default async function StockPage() {
         }, 0);
 
         // Calculate current stock
-        const currentStock = product.stockEntries.reduce((sum, entry) => sum + entry.amount, 0);
+        const currentStock = (product.stock || []).reduce((sum, entry) => sum + entry.amount, 0);
 
         // Calculate deficit (what needs to be produced)
         const toProduce = Math.max(0, totalOrdered - currentStock);

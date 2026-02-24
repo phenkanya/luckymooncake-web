@@ -67,6 +67,21 @@ export function EditMenuDialog({ product }: EditMenuDialogProps) {
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="edit-cost" className="text-right">
+                                ต้นทุน (บาท) <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                id="edit-cost"
+                                name="cost"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                defaultValue={product.cost || 0}
+                                required
+                                className="col-span-3"
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="edit-price" className="text-right">
                                 ราคา (บาท) <span className="text-red-500">*</span>
                             </Label>
@@ -78,28 +93,6 @@ export function EditMenuDialog({ product }: EditMenuDialogProps) {
                                 min="0"
                                 defaultValue={product.price}
                                 required
-                                className="col-span-3"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-description" className="text-right">
-                                รายละเอียด
-                            </Label>
-                            <Input
-                                id="edit-description"
-                                name="description"
-                                defaultValue={product.description || ""}
-                                className="col-span-3"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-imageUrl" className="text-right">
-                                ลิงก์รูปภาพ
-                            </Label>
-                            <Input
-                                id="edit-imageUrl"
-                                name="imageUrl"
-                                defaultValue={product.imageUrl || ""}
                                 className="col-span-3"
                             />
                         </div>

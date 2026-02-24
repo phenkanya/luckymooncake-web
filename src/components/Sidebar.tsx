@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
-    CakeSlice,
+    UtensilsCrossed,
     ClipboardList,
-    PackageSearch,
+    PackageOpen,
     Truck,
+    Wallet,
+    Tag,
     Menu,
     X
 } from "lucide-react";
@@ -19,10 +21,11 @@ export function Sidebar() {
 
     const links = [
         { name: "Dashboard", href: "/", icon: LayoutDashboard },
-        { name: "เมนู (Menus)", href: "/menus", icon: CakeSlice },
+        { name: "เมนูขนม", href: "/menus", icon: UtensilsCrossed },
         { name: "ออเดอร์ (Orders)", href: "/orders", icon: ClipboardList },
-        { name: "สต็อก (Stock)", href: "/stock", icon: PackageSearch },
+        { name: "สต็อกสินค้า", href: "/stock", icon: PackageOpen },
         { name: "สรุปส่งประจำวัน", href: "/dispatch", icon: Truck },
+        { name: "รายจ่าย", href: "/expenses", icon: Wallet },
     ];
 
     const toggleSidebar = () => setIsOpen(!isOpen);

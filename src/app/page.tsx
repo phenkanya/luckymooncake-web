@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Package, DollarSign, ShoppingBag, TrendingUp } from "lucide-react";
+import { Package, DollarSign, ShoppingBag, TrendingUp, Wallet, Banknote } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Top10SnacksChart } from "@/components/Top10SnacksChart";
 
@@ -46,10 +46,27 @@ export default async function DashboardPage() {
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 10);
 
-  // Calculate metrics
-  const totalSales = orders
-    .filter((o: any) => o.paymentStatus === "PAID")
-    .reduce((sum: number, o: any) => sum + o.totalAmount, 0);
+  // Calculate total expenses
+  const expenses = await prisma.expense.findMany();
+  const totalExpenses = expenses.reduce((sum: any, exp: any) => sum + exp.amount, 0);
+
+  // Calculate total revenue and profit from paid orders
+  let totalSales = 0;
+  let totalCost = 0;
+
+  orders.forEach((order: any) => {
+    if (order.paymentStatus === 'PAID') {
+      totalSales += order.totalAmount;
+
+      // Calculate cost for this order
+      order.items?.forEach((item: any) => {
+        const itemCost = item.product?.cost || 0;
+        totalCost += (itemCost * item.quantity);
+      });
+    }
+  });
+
+  const totalProfit = totalSales - totalCost - totalExpenses;
 
   const pendingOrders = orders.filter((o: any) => o.paymentStatus !== "PAID").length;
 
@@ -94,25 +111,25 @@ export default async function DashboardPage() {
         </Card>
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">เมนูขนมในระบบ</CardTitle>
-            <Package className="w-4 h-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">กำไรสุทธิ (Profit)</CardTitle>
+            <Banknote className="w-4 h-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productsCount} เมนู</div>
+            <div className="text-2xl font-bold text-emerald-600">฿{totalProfit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              สินค้าทั้งหมดที่เปิดขาย
+              ยอดขายหักต้นทุนและรายจ่ายแล้ว
             </p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">ความเคลื่อนไหวสต็อก</CardTitle>
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">รายจ่ายส่วนกลาง</CardTitle>
+            <Wallet className="w-4 h-4 text-red-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stockEntries} รายการ</div>
+            <div className="text-2xl font-bold text-red-500">฿{totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              ประวัติการนำเข้า-ออก
+              จากหน้าจัดการรายจ่าย
             </p>
           </CardContent>
         </Card>
