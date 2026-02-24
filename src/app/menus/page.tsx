@@ -27,10 +27,8 @@ export default async function MenusPage() {
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>
-                            <TableHead>ชื่อเมนู</TableHead>
-                            <TableHead className="text-right">ต้นทุน</TableHead>
+                            <TableHead>เมนู</TableHead>
                             <TableHead className="text-right">ราคาขาย</TableHead>
-                            <TableHead className="text-right">กำไรต่อชิ้น</TableHead>
                             <TableHead className="text-right">จัดการ</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -45,14 +43,8 @@ export default async function MenusPage() {
                             products.map((product) => (
                                 <TableRow key={product.id} className="hover:bg-muted/30">
                                     <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell className="text-right text-muted-foreground">
-                                        ฿{(product.cost || 0).toFixed(2)}
-                                    </TableCell>
                                     <TableCell className="text-right font-medium text-blue-600 dark:text-blue-400">
                                         ฿{product.price.toFixed(2)}
-                                    </TableCell>
-                                    <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">
-                                        ฿{(product.price - (product.cost || 0)).toFixed(2)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">

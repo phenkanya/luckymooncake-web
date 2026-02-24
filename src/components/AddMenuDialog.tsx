@@ -61,21 +61,7 @@ export function AddMenuDialog() {
                                 placeholder="เช่น ขนมเปี๊ยะไส้ถั่วไข่เค็ม"
                             />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="cost" className="text-right">
-                                ต้นทุน (บาท) <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                id="cost"
-                                name="cost"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                required
-                                className="col-span-3"
-                                placeholder="0.00"
-                            />
-                        </div>
+
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">
                                 ราคา (บาท) <span className="text-red-500">*</span>
