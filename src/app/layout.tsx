@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={`${notoSansThai.className} flex h-screen bg-muted/20 overflow-hidden`}>
         <Sidebar />
         <main className="flex-1 h-full overflow-y-auto w-full">
-          <div className="p-6 md:p-8 w-full max-w-7xl mx-auto">
+          <div className="p-4 pt-16 md:p-8 w-full max-w-7xl mx-auto">
             {children}
           </div>
         </main>
