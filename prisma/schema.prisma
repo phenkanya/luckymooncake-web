@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  orderItems  OrderItem[]
+  stockEntries StockEntry[]
+}
+
+model PreorderRound {
+  id           String      @id @default(uuid())
+  name         String      // e.g., "Round 1 - Valentine's Day"
+  startDate    DateTime
+  endDate      DateTime
+  deliveryDate DateTime
+  isActive     Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  orders       Order[]
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  roundId         String
+  customerName    String
+  customerPhone   String
+  customerAddress String?
+  deliveryDate    DateTime?
+  note            String?
+  // Payment Statuses: 'UNPAID', 'PAID'
+  paymentStatus   String      @default("UNPAID")
+
+  // Shipping Statuses: 'WAITING', 'PREPARING', 'SHIPPED'
+  shippingStatus  String      @default("WAITING")
+  // Payment
+  totalAmount     Float
+  paymentSlipUrl  String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  round           PreorderRound @relation(fields: [roundId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String?
+  quantity  Int
+  price     Float   // Historical price at time of order
+
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model StockEntry {
+  id        String   @id @default(uuid())
+  productId String
+  amount    Int      // Positive for added stock, negative for consumed stock
+  note      String?
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
