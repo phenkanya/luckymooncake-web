@@ -118,10 +118,13 @@ export default async function DispatchPage() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const dayAfterTomorrow = new Date(tomorrow);
-    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
+    const in2Days = new Date(today);
+    in2Days.setDate(in2Days.getDate() + 2);
 
-    // Consider orders that are PAID or READY and have some dispatch relevance
+    const in3Days = new Date(today);
+    in3Days.setDate(in3Days.getDate() + 3);
+
+    // Consider orders that are PAID and have active shipping status
     const activeOrders = await prisma.order.findMany({
         where: {
             paymentStatus: "PAID",
@@ -140,13 +143,6 @@ export default async function DispatchPage() {
         orderBy: { createdAt: 'asc' }
     });
 
-    console.log("--- DEBUG DISPATCH DATES ---");
-    activeOrders.forEach(o => {
-        console.log(`Order ${o.id.split('-')[0]} - deliveryDate from DB:`, o.deliveryDate);
-    });
-    console.log("Today:", today);
-    console.log("Tomorrow:", tomorrow);
-
     // Helper to strip time from a date for pure date comparisons
     const isSameOrBeforeDate = (date1: Date, date2: Date) => {
         const d1 = new Date(date1);
@@ -160,16 +156,49 @@ export default async function DispatchPage() {
         return d1.getTime() === date2.getTime();
     };
 
-    // Split orders into Today and Tomorrow
-    // Today includes orders that have deliveryDate <= today OR missing deliveryDate
+    // Split orders into 4 days
+    // 1. วันนี้ (รวมออเดอร์ที่ deliveryDate <= วันนี้ หรือไม่มี deliveryDate)
     const todayOrders = activeOrders.filter((o: any) =>
         !o.deliveryDate || isSameOrBeforeDate(o.deliveryDate, today)
     );
 
-    // Tomorrow includes orders exactly on tomorrow's date
+    // 2. พรุ่งนี้ (+1 วัน)
     const tomorrowOrders = activeOrders.filter((o: any) =>
         o.deliveryDate && isSameDate(o.deliveryDate, tomorrow)
     );
+
+    // 3. อีก 2 วัน (+2 วัน)
+    const in2DaysOrders = activeOrders.filter((o: any) =>
+        o.deliveryDate && isSameDate(o.deliveryDate, in2Days)
+    );
+
+    // 4. อีก 3 วัน (+3 วัน)
+    const in3DaysOrders = activeOrders.filter((o: any) =>
+        o.deliveryDate && isSameDate(o.deliveryDate, in3Days)
+    );
+
+    const dispatchSections = [
+        {
+            title: "จัดส่งวันนี้",
+            date: today,
+            orders: todayOrders,
+        },
+        {
+            title: "จัดส่งพรุ่งนี้",
+            date: tomorrow,
+            orders: tomorrowOrders,
+        },
+        {
+            title: "จัดส่งอีก 2 วัน",
+            date: in2Days,
+            orders: in2DaysOrders,
+        },
+        {
+            title: "จัดส่งอีก 3 วัน",
+            date: in3Days,
+            orders: in3DaysOrders,
+        }
+    ];
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
@@ -177,24 +206,21 @@ export default async function DispatchPage() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">สรุปยอดจัดส่งประจำวัน</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        ข้อมูลออเดอร์และรายการขนมที่ต้องเตรียมแพ็คสำหรับรอบจัดส่ง
+                        ข้อมูลออเดอร์และรายการขนมที่ต้องเตรียมแพ็คสำหรับรอบจัดส่งล่วงหน้า 4 วัน
                     </p>
                 </div>
             </div>
 
-            <DispatchSection
-                title="จัดส่งวันนี้"
-                dateTitle={format(today, 'dd MMMM yyyy', { locale: th })}
-                orders={todayOrders}
-            />
-
-            <hr className="border-dashed" />
-
-            <DispatchSection
-                title="เตรียมจัดส่งพรุ่งนี้"
-                dateTitle={format(tomorrow, 'dd MMMM yyyy', { locale: th })}
-                orders={tomorrowOrders}
-            />
+            {dispatchSections.map((section, idx) => (
+                <div key={idx} className="space-y-8">
+                    {idx > 0 && <hr className="border-dashed" />}
+                    <DispatchSection
+                        title={section.title}
+                        dateTitle={format(section.date, 'dd MMMM yyyy (EEEE)', { locale: th })}
+                        orders={section.orders}
+                    />
+                </div>
+            ))}
         </div>
     );
 }
