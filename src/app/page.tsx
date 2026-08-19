@@ -6,7 +6,7 @@ import { Top10SnacksChart } from "@/components/Top10SnacksChart";
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const [orders, productsCount, stockEntries] = await Promise.all([
+  const [orders, productsCount, stockEntries, expenses] = await Promise.all([
     prisma.order.findMany({
       include: {
         items: {
@@ -16,17 +16,16 @@ export default async function DashboardPage() {
     }),
     prisma.product.count(),
     prisma.stockEntry.count(),
+    prisma.expense.findMany()
   ]);
 
+  const totalExpenses = expenses.reduce((sum: any, exp: any) => sum + exp.amount, 0);
   const totalOrders = orders.length;
 
   // Calculate top 10 snacks
   const itemSummary: Record<string, { name: string, quantity: number }> = {};
 
   orders.forEach((order: any) => {
-    // Only count items from PAID orders to reflect actual sales, 
-    // or you can remove this condition to count all placed orders.
-    // Let's count all to match "จำนวนขนมที่สั่ง" (ordered amount).
     order.items?.forEach((item: any) => {
       const productId = item.productId || "deleted";
       const productName = item.product?.name || "สินค้าถูกลบ";
@@ -45,10 +44,6 @@ export default async function DashboardPage() {
   const top10Snacks = Object.values(itemSummary)
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 10);
-
-  // Calculate total expenses
-  const expenses = await prisma.expense.findMany();
-  const totalExpenses = expenses.reduce((sum: any, exp: any) => sum + exp.amount, 0);
 
   // Calculate total revenue and profit from paid orders
   let totalSales = 0;

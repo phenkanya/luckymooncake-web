@@ -6,36 +6,33 @@ import { ManageStockDialog } from "@/components/ManageStockDialog";
 export const dynamic = 'force-dynamic';
 
 export default async function StockPage() {
-    const stockEntries = await prisma.stockEntry.findMany({
-        orderBy: { createdAt: 'desc' },
-        include: {
-            product: true
-        },
-        take: 50
-    });
-
-    // Fetch active products to populate the dropdowns
-    const products = await prisma.product.findMany({
-        where: { isActive: true },
-        orderBy: { name: 'asc' },
-        include: {
-            stock: true
-        }
-    });
-
-    // Calculate Production Summary
-    // 1. Get all PAID, but not yet SHIPPED orders
-    const activeOrders = await prisma.order.findMany({
-        where: {
-            paymentStatus: "PAID",
-            shippingStatus: {
-                not: "SHIPPED"
+    const [stockEntries, products, activeOrders] = await Promise.all([
+        prisma.stockEntry.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: {
+                product: true
+            },
+            take: 50
+        }),
+        prisma.product.findMany({
+            where: { isActive: true },
+            orderBy: { name: 'asc' },
+            include: {
+                stock: true
             }
-        },
-        include: {
-            items: true
-        }
-    });
+        }),
+        prisma.order.findMany({
+            where: {
+                paymentStatus: "PAID",
+                shippingStatus: {
+                    not: "SHIPPED"
+                }
+            },
+            include: {
+                items: true
+            }
+        })
+    ]);
 
     const productionPlan = products.map(product => {
         // Calculate total ordered quantity for this product
