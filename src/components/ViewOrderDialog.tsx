@@ -146,10 +146,33 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
                                     <span>฿{(item.price * item.quantity).toFixed(2)}</span>
                                 </div>
                             ))}
-                            <div className="flex justify-between font-bold text-primary pt-2 border-t mt-2">
-                                <span>ยอดรวมทั้งสิ้น</span>
-                                <span>฿{order.totalAmount.toFixed(2)}</span>
-                            </div>
+
+                            {(() => {
+                                const subtotal = order.items.reduce((s, i) => s + (i.price * i.quantity), 0);
+                                const discount = Math.max(0, subtotal - order.totalAmount);
+                                const discountPct = subtotal > 0 && discount > 0 ? Math.round((discount / subtotal) * 100) : 0;
+
+                                return (
+                                    <div className="space-y-1 pt-2 border-t mt-2 text-sm">
+                                        {discount > 0 && (
+                                            <>
+                                                <div className="flex justify-between text-muted-foreground">
+                                                    <span>ราคารวมสินค้า</span>
+                                                    <span>฿{subtotal.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-red-500 font-medium">
+                                                    <span>ส่วนลด {discountPct > 0 ? `(${discountPct}%)` : ""}</span>
+                                                    <span>-฿{discount.toFixed(2)}</span>
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className="flex justify-between font-bold text-primary text-base pt-1">
+                                            <span>ยอดรวมทั้งสิ้น</span>
+                                            <span>฿{order.totalAmount.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     </div>
 

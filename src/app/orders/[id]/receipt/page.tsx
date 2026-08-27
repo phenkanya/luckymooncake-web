@@ -90,10 +90,32 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
 
                     {/* Total & Note */}
                     <div className="pt-4 border-t border-dashed" style={{ borderColor: "#d1d5db" }}>
-                        <div className="flex justify-between items-center text-lg font-bold mb-4" style={{ color: "#111827" }}>
-                            <span>ยอดรวมทั้งสิ้น (Total)</span>
-                            <span className="text-2xl" style={{ color: "#2563eb" }}>฿ {order.totalAmount.toFixed(2)}</span>
-                        </div>
+                        {(() => {
+                            const subtotal = order.items.reduce((s: number, i: any) => s + (i.price * i.quantity), 0);
+                            const discount = Math.max(0, subtotal - order.totalAmount);
+                            const discountPct = subtotal > 0 && discount > 0 ? Math.round((discount / subtotal) * 100) : 0;
+
+                            return (
+                                <>
+                                    {discount > 0 && (
+                                        <div className="space-y-1 mb-3 text-sm">
+                                            <div className="flex justify-between" style={{ color: "#6b7280" }}>
+                                                <span>ราคารวมสินค้า (Subtotal):</span>
+                                                <span>฿ {subtotal.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between font-medium" style={{ color: "#ef4444" }}>
+                                                <span>ส่วนลดพิเศษ {discountPct > 0 ? `(${discountPct}%)` : ""} (Discount):</span>
+                                                <span>- ฿ {discount.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-center text-lg font-bold mb-4" style={{ color: "#111827" }}>
+                                        <span>ยอดรวมสุทธิ (Total)</span>
+                                        <span className="text-2xl" style={{ color: "#2563eb" }}>฿ {order.totalAmount.toFixed(2)}</span>
+                                    </div>
+                                </>
+                            );
+                        })()}
 
                         {order.note && (
                             <div className="mt-4 p-3 rounded-lg text-sm" style={{ backgroundColor: "#f9fafb", color: "#4b5563" }}>

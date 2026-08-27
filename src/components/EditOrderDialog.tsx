@@ -70,6 +70,53 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
         setItems(newItems);
     };
 
+    const existingSubtotal = order.items.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const existingDiscount = Math.max(0, existingSubtotal - order.totalAmount);
+    let initialMode: "NONE" | "5" | "10" | "15" | "20" | "CUSTOM_PERCENT" | "CUSTOM_AMOUNT" = "NONE";
+    let initialCustom = 0;
+
+    if (existingDiscount > 0 && existingSubtotal > 0) {
+        const pct = Math.round((existingDiscount / existingSubtotal) * 100);
+        if (pct === 5) initialMode = "5";
+        else if (pct === 10) initialMode = "10";
+        else if (pct === 15) initialMode = "15";
+        else if (pct === 20) initialMode = "20";
+        else {
+            initialMode = "CUSTOM_AMOUNT";
+            initialCustom = existingDiscount;
+        }
+    }
+
+    const [discountMode, setDiscountMode] = useState<"NONE" | "5" | "10" | "15" | "20" | "CUSTOM_PERCENT" | "CUSTOM_AMOUNT">(initialMode);
+    const [customDiscountValue, setCustomDiscountValue] = useState<number>(initialCustom);
+
+    const itemsSubtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    let discountPercent = 0;
+    let discountAmount = 0;
+
+    if (discountMode === "5") {
+        discountPercent = 5;
+        discountAmount = (itemsSubtotal * 5) / 100;
+    } else if (discountMode === "10") {
+        discountPercent = 10;
+        discountAmount = (itemsSubtotal * 10) / 100;
+    } else if (discountMode === "15") {
+        discountPercent = 15;
+        discountAmount = (itemsSubtotal * 15) / 100;
+    } else if (discountMode === "20") {
+        discountPercent = 20;
+        discountAmount = (itemsSubtotal * 20) / 100;
+    } else if (discountMode === "CUSTOM_PERCENT") {
+        discountPercent = customDiscountValue;
+        discountAmount = (itemsSubtotal * customDiscountValue) / 100;
+    } else if (discountMode === "CUSTOM_AMOUNT") {
+        discountPercent = itemsSubtotal > 0 ? (customDiscountValue / itemsSubtotal) * 100 : 0;
+        discountAmount = customDiscountValue;
+    }
+
+    const grandTotal = Math.max(0, itemsSubtotal - discountAmount);
+
     async function handleSubmit(formData: FormData) {
         if (items.some(item => !item.productId || item.quantity < 1)) {
             alert("กรุณาเลือกสินค้าและระบุจำนวนให้ถูกต้องทุกรายการ");
@@ -79,6 +126,12 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
         setLoading(true);
         formData.append("orderId", order.id);
         formData.append("items", JSON.stringify(items));
+
+        if (discountPercent > 0) {
+            formData.append("discountPercent", discountPercent.toString());
+        } else if (discountAmount > 0) {
+            formData.append("discountAmount", discountAmount.toString());
+        }
 
         try {
             await updateOrder(formData);
@@ -90,8 +143,6 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
             setLoading(false);
         }
     }
-
-    const grandTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     // Format delivery date for the input field (YYYY-MM-DD)
     const formattedDeliveryDate = order.deliveryDate
@@ -184,9 +235,80 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
                                 </div>
                             ))}
 
-                            <div className="flex justify-between items-center px-2 py-3 bg-muted/50 rounded-lg">
-                                <span className="font-semibold text-sm">ยอดรวมทั้งสิ้น:</span>
-                                <span className="font-bold text-lg text-primary">฿{grandTotal.toFixed(2)}</span>
+                            {/* Discount Section */}
+                            <div className="space-y-2 p-3 bg-muted/40 rounded-lg border border-border/50">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                                        🏷️ ส่วนลด (Discount)
+                                    </Label>
+                                    {discountAmount > 0 && (
+                                        <span className="text-xs text-red-500 font-medium">
+                                            ลด ฿{discountAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} ({discountPercent.toFixed(0)}%)
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {[
+                                        { label: "ไม่มี (0%)", val: "NONE" },
+                                        { label: "5%", val: "5" },
+                                        { label: "10% ⭐", val: "10" },
+                                        { label: "15%", val: "15" },
+                                        { label: "20%", val: "20" },
+                                        { label: "ระบุ % เอง", val: "CUSTOM_PERCENT" },
+                                        { label: "ระบุ ฿ เอง", val: "CUSTOM_AMOUNT" },
+                                    ].map((btn) => (
+                                        <Button
+                                            key={btn.val}
+                                            type="button"
+                                            size="sm"
+                                            variant={discountMode === btn.val ? "default" : "outline"}
+                                            className={`h-7 text-xs px-2.5 ${discountMode === btn.val ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground"}`}
+                                            onClick={() => {
+                                                setDiscountMode(btn.val as any);
+                                                if (btn.val === "NONE" || btn.val === "5" || btn.val === "10" || btn.val === "15" || btn.val === "20") {
+                                                    setCustomDiscountValue(0);
+                                                }
+                                            }}
+                                        >
+                                            {btn.label}
+                                        </Button>
+                                    ))}
+                                </div>
+
+                                {(discountMode === "CUSTOM_PERCENT" || discountMode === "CUSTOM_AMOUNT") && (
+                                    <div className="pt-2 flex items-center gap-2">
+                                        <Label className="text-xs whitespace-nowrap">
+                                            {discountMode === "CUSTOM_PERCENT" ? "ระบุ % ส่วนลด:" : "ระบุจำนวนเงินส่วนลด (บาท):"}
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            max={discountMode === "CUSTOM_PERCENT" ? "100" : undefined}
+                                            placeholder={discountMode === "CUSTOM_PERCENT" ? "เช่น 10" : "เช่น 50"}
+                                            value={customDiscountValue || ""}
+                                            onChange={(e) => setCustomDiscountValue(parseFloat(e.target.value) || 0)}
+                                            className="h-8 text-sm max-w-[140px]"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Subtotal, Discount & Grand Total breakdown */}
+                            <div className="space-y-1.5 px-3 py-2.5 bg-muted/60 rounded-lg text-sm">
+                                <div className="flex justify-between text-muted-foreground">
+                                    <span>ราคารวมสินค้า:</span>
+                                    <span>฿{itemsSubtotal.toFixed(2)}</span>
+                                </div>
+                                {discountAmount > 0 && (
+                                    <div className="flex justify-between text-red-500 font-medium">
+                                        <span>ส่วนลด ({discountPercent > 0 ? `${discountPercent.toFixed(0)}%` : "บาท"}):</span>
+                                        <span>-฿{discountAmount.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center font-bold text-base pt-1.5 border-t border-border/50">
+                                    <span>ยอดรวมสุทธิ:</span>
+                                    <span className="text-lg text-primary">฿{grandTotal.toFixed(2)}</span>
+                                </div>
                             </div>
                         </div>
                         {/* Extra Details */}

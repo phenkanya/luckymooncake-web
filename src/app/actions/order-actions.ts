@@ -27,7 +27,18 @@ export async function createOrder(formData: FormData) {
         throw new Error("Order must contain at least one item");
     }
 
-    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discountPercentStr = formData.get("discountPercent") as string;
+    const discountAmountStr = formData.get("discountAmount") as string;
+
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    let discount = 0;
+    if (discountPercentStr && parseFloat(discountPercentStr) > 0) {
+        discount = (subtotal * parseFloat(discountPercentStr)) / 100;
+    } else if (discountAmountStr && parseFloat(discountAmountStr) > 0) {
+        discount = parseFloat(discountAmountStr);
+    }
+
+    const totalAmount = Math.max(0, subtotal - discount);
 
     // We need to associate with a round. If no roundId provided, grab the first active one.
     let finalRoundId = roundId;
@@ -133,7 +144,18 @@ export async function updateOrder(formData: FormData) {
         throw new Error("Order must contain at least one item");
     }
 
-    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discountPercentStr = formData.get("discountPercent") as string;
+    const discountAmountStr = formData.get("discountAmount") as string;
+
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    let discount = 0;
+    if (discountPercentStr && parseFloat(discountPercentStr) > 0) {
+        discount = (subtotal * parseFloat(discountPercentStr)) / 100;
+    } else if (discountAmountStr && parseFloat(discountAmountStr) > 0) {
+        discount = parseFloat(discountAmountStr);
+    }
+
+    const totalAmount = Math.max(0, subtotal - discount);
 
     let deliveryDate = null;
     if (deliveryDateStr) {
