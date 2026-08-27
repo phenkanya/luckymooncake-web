@@ -16,7 +16,8 @@ import { ViewOrderDialog } from "@/components/ViewOrderDialog";
 import { EditOrderDialog } from "@/components/EditOrderDialog";
 import { DeleteOrderButton } from "@/components/DeleteOrderButton";
 import { AddOrderDialog } from "@/components/AddOrderDialog";
-import { Search, ReceiptText, ArrowUpDown, Filter, RotateCcw } from "lucide-react";
+import { Search, ReceiptText, ArrowUpDown, Filter, RotateCcw, RefreshCw } from "lucide-react";
+import { syncAllOrderPrices } from "@/app/actions/order-actions";
 import Link from "next/link";
 
 interface OrdersTableProps {
@@ -29,6 +30,21 @@ export function OrdersTable({ orders, activeProducts }: OrdersTableProps) {
     const [sortBy, setSortBy] = useState("created_desc");
     const [paymentFilter, setPaymentFilter] = useState("ALL");
     const [shippingFilter, setShippingFilter] = useState("ALL");
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    async function handleSyncAllPrices() {
+        if (!confirm("ต้องการอัปเดตราคาของออเดอร์ทั้งหมด (ที่ยังไม่ชำระเงิน) ให้ตรงกับราคาเมนูปัจจุบันใช่หรือไม่?")) return;
+        setIsSyncing(true);
+        try {
+            const res = await syncAllOrderPrices(false);
+            alert(`อัปเดตราคาเรียบร้อยแล้ว (${res.updatedCount} ออเดอร์ที่มีการปรับราคา)`);
+        } catch (e) {
+            console.error(e);
+            alert("เกิดข้อผิดพลาดในการอัปเดตราคา");
+        } finally {
+            setIsSyncing(false);
+        }
+    }
 
     // Filter orders
     const filteredOrders = useMemo(() => {
@@ -131,7 +147,21 @@ export function OrdersTable({ orders, activeProducts }: OrdersTableProps) {
                         ดูและสร้างออเดอร์ใหม่จากลูกค้า จัดการสถานะการชำระเงินและขนส่ง
                     </p>
                 </div>
-                <AddOrderDialog products={activeProducts} />
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="default"
+                        onClick={handleSyncAllPrices}
+                        disabled={isSyncing}
+                        className="gap-2 shadow-sm text-xs sm:text-sm text-muted-foreground hover:text-foreground"
+                        title="อัปเดตราคาขนมในทุกออเดอร์ (ที่ยังไม่จ่าย) ให้ตรงกับราคาเมนูล่าสุด"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin text-primary" : ""}`} />
+                        {isSyncing ? "กำลังปรับราคา..." : "ซิงค์ราคาตามเมนู"}
+                    </Button>
+                    <AddOrderDialog products={activeProducts} />
+                </div>
             </div>
 
             {/* Filter & Sort Controls Bar */}

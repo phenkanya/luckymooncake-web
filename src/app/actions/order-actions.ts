@@ -213,3 +213,57 @@ export async function deleteOrder(orderId: string) {
     revalidatePath("/dispatch");
     revalidatePath("/");
 }
+
+export async function syncAllOrderPrices(includePaid: boolean = false) {
+    const products = await prisma.product.findMany();
+    const productPriceMap = new Map(products.map(p => [p.id, p.price]));
+
+    const orders = await prisma.order.findMany({
+        where: includePaid ? {} : { paymentStatus: { not: "PAID" } },
+        include: {
+            items: true
+        }
+    });
+
+    let updatedCount = 0;
+
+    for (const order of orders) {
+        let hasChanges = false;
+        let newSubtotal = 0;
+        const oldSubtotal = order.items.reduce((s, i) => s + (i.price * i.quantity), 0);
+        const oldDiscount = Math.max(0, oldSubtotal - order.totalAmount);
+        const discountPct = oldSubtotal > 0 && oldDiscount > 0 ? (oldDiscount / oldSubtotal) : 0;
+
+        for (const item of order.items) {
+            if (item.productId && productPriceMap.has(item.productId)) {
+                const currentPrice = productPriceMap.get(item.productId)!;
+                if (item.price !== currentPrice) {
+                    hasChanges = true;
+                    await prisma.orderItem.update({
+                        where: { id: item.id },
+                        data: { price: currentPrice }
+                    });
+                }
+                newSubtotal += currentPrice * item.quantity;
+            } else {
+                newSubtotal += item.price * item.quantity;
+            }
+        }
+
+        if (hasChanges) {
+            const newDiscount = newSubtotal * discountPct;
+            const newTotal = Math.max(0, newSubtotal - newDiscount);
+            await prisma.order.update({
+                where: { id: order.id },
+                data: { totalAmount: newTotal }
+            });
+            updatedCount++;
+        }
+    }
+
+    revalidatePath("/orders");
+    revalidatePath("/");
+    revalidatePath("/dispatch");
+
+    return { updatedCount };
+}

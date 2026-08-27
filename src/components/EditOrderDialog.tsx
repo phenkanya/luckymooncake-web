@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit2, Plus, Trash2 } from "lucide-react";
+import { Edit2, Plus, Trash2, RefreshCw } from "lucide-react";
 import { updateOrder } from "@/app/actions/order-actions";
 import { useState } from "react";
 import {
@@ -68,6 +68,22 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
         const newItems = [...items];
         newItems[index].quantity = qty;
         setItems(newItems);
+    };
+
+    const hasPriceMismatch = items.some(item => {
+        const product = products.find(p => p.id === item.productId);
+        return product && product.price !== item.price;
+    });
+
+    const handleSyncPrices = () => {
+        const updated = items.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            return {
+                ...item,
+                price: product ? product.price : item.price
+            };
+        });
+        setItems(updated);
     };
 
     const existingSubtotal = order.items.reduce((s, i) => s + (i.price * i.quantity), 0);
@@ -189,10 +205,36 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="font-semibold text-sm">รายการสินค้า</h3>
-                                <Button type="button" variant="outline" size="sm" onClick={handleAddItem} className="h-8 gap-1">
-                                    <Plus className="w-3 h-3" /> เพิ่มรายการ
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    {hasPriceMismatch && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleSyncPrices}
+                                            className="h-8 gap-1.5 text-xs text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100"
+                                        >
+                                            <RefreshCw className="w-3 h-3" /> อัปเดตราคาเมนูล่าสุด
+                                        </Button>
+                                    )}
+                                    <Button type="button" variant="outline" size="sm" onClick={handleAddItem} className="h-8 gap-1">
+                                        <Plus className="w-3 h-3" /> เพิ่มรายการ
+                                    </Button>
+                                </div>
                             </div>
+
+                            {hasPriceMismatch && (
+                                <div className="text-xs bg-amber-50 text-amber-800 p-2.5 rounded-lg border border-amber-200 flex justify-between items-center">
+                                    <span>⚠️ ราคาขนมในเมนูมีการเปลี่ยนแปลงจากตอนสร้างออเดอร์</span>
+                                    <button
+                                        type="button"
+                                        onClick={handleSyncPrices}
+                                        className="underline font-semibold hover:text-amber-900 ml-2"
+                                    >
+                                        กดปรับตามราคาใหม่ทันที
+                                    </button>
+                                </div>
+                            )}
 
                             {items.map((item, index) => (
                                 <div key={index} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
