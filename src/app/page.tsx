@@ -3,6 +3,7 @@ import { Package, DollarSign, ShoppingBag, TrendingUp, Wallet, Banknote, ArrowRi
 import { prisma } from "@/lib/prisma";
 import { Top10SnacksChart } from "@/components/Top10SnacksChart";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
