@@ -58,7 +58,7 @@ export default async function ExpensesPage() {
                                     </TableCell>
                                     <TableCell className="font-medium">{expense.description}</TableCell>
                                     <TableCell className="text-right font-medium text-red-500 dark:text-red-400">
-                                        ฿{expense.amount.toFixed(2)}
+                                        ฿{expense.amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">

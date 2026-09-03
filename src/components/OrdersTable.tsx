@@ -307,15 +307,15 @@ export function OrdersTable({ orders, activeProducts }: OrdersTableProps) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-                                                <span>฿{order.totalAmount.toFixed(2)}</span>
+                                                <span>฿{order.totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                 {hasDiscount && (
                                                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-600 font-semibold dark:bg-red-950 dark:text-red-400">
-                                                        ลด {discountPct > 0 ? `${discountPct}%` : `฿${discountAmount.toFixed(0)}`}
+                                                        ลด {discountPct > 0 ? `${discountPct}%` : `฿${discountAmount.toLocaleString('th-TH')}`}
                                                     </span>
                                                 )}
                                             </div>
                                             <div className="text-xs text-muted-foreground mt-0.5">
-                                                รวม {totalQty} ชิ้น {hasDiscount && <span className="line-through text-muted-foreground/70">(฿{itemsSubtotal.toFixed(0)})</span>}
+                                                รวม {totalQty.toLocaleString('th-TH')} ชิ้น {hasDiscount && <span className="line-through text-muted-foreground/70">(฿{itemsSubtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>}
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-xs text-muted-foreground">

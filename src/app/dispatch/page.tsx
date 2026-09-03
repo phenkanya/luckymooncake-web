@@ -44,7 +44,7 @@ function DispatchSection({ title, dateTitle, orders }: { title: string, dateTitl
                             {Object.values(itemSummary).map((item, idx) => (
                                 <li key={idx} className="flex justify-between pt-3 first:pt-0">
                                     <span className="font-medium text-sm">{item.name}</span>
-                                    <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">{item.quantity} ชิ้น</span>
+                                    <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">{item.quantity.toLocaleString('th-TH')} ชิ้น</span>
                                 </li>
                             ))}
                         </ul>
@@ -88,7 +88,7 @@ function DispatchSection({ title, dateTitle, orders }: { title: string, dateTitl
                                                 {order.items.map((item: any) => (
                                                     <li key={item.id} className="flex justify-between max-w-[200px]">
                                                         <span className="text-muted-foreground">{item.product?.name || "สินค้าถูกลบ"}</span>
-                                                        <span className="font-medium">x{item.quantity}</span>
+                                                        <span className="font-medium">x{item.quantity.toLocaleString('th-TH')}</span>
                                                     </li>
                                                 ))}
                                             </ul>
