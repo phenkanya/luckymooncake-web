@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import { Printer, Download, ArrowLeft } from "lucide-react";
+import { Printer, Download, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 
 export function PrintButton() {
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
     const handlePrint = () => {
         window.print();
@@ -17,30 +18,36 @@ export function PrintButton() {
         const element = document.getElementById("receipt-content");
         if (!element) return;
 
-        setIsGenerating(true);
+        setIsGeneratingPdf(true);
         try {
+            // Render high-resolution image of the receipt content
             const imgData = await toPng(element, {
                 cacheBust: true,
-                pixelRatio: 2,
+                pixelRatio: 3,
                 backgroundColor: "#ffffff",
             });
 
+            // Calculate exact dimensions so the PDF height fits the content perfectly
+            const elementWidth = element.offsetWidth || element.scrollWidth || 400;
+            const elementHeight = element.offsetHeight || element.scrollHeight || 600;
+
+            const pdfWidthMm = 105; // Standard slip width (105mm)
+            const pdfHeightMm = (elementHeight * pdfWidthMm) / elementWidth;
+
+            // Create custom-sized PDF matching exact receipt content length
             const pdf = new jsPDF({
                 orientation: "portrait",
                 unit: "mm",
-                format: "a4"
+                format: [pdfWidthMm, pdfHeightMm]
             });
 
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
-
-            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+            pdf.addImage(imgData, "PNG", 0, 0, pdfWidthMm, pdfHeightMm);
 
             const blob = pdf.output("blob");
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "receipt.pdf";
+            a.download = `receipt-${Date.now()}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -50,7 +57,33 @@ export function PrintButton() {
             console.error("Error generating PDF", error);
             alert("เกิดข้อผิดพลาดในการสร้าง PDF: " + (error instanceof Error ? error.message : ""));
         } finally {
-            setIsGenerating(false);
+            setIsGeneratingPdf(false);
+        }
+    };
+
+    const handleDownloadImage = async () => {
+        const element = document.getElementById("receipt-content");
+        if (!element) return;
+
+        setIsGeneratingImage(true);
+        try {
+            const imgData = await toPng(element, {
+                cacheBust: true,
+                pixelRatio: 3,
+                backgroundColor: "#ffffff",
+            });
+
+            const a = document.createElement("a");
+            a.href = imgData;
+            a.download = `receipt-${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Error generating image", error);
+            alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
+        } finally {
+            setIsGeneratingImage(false);
         }
     };
 
@@ -63,22 +96,33 @@ export function PrintButton() {
                 <ArrowLeft className="w-4 h-4" /> กลับ
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
                 <button
                     type="button"
-                    onClick={handlePrint}
-                    className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm transition-colors"
+                    onClick={handleDownloadImage}
+                    disabled={isGeneratingImage}
+                    className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
+                    title="บันทึกเป็นรูปภาพสำหรับส่งให้ลูกค้าใน LINE / แชท"
                 >
-                    <Printer className="w-4 h-4" /> พิมพ์
+                    <ImageIcon className="w-4 h-4" />
+                    {isGeneratingImage ? "กำลังเซฟรูป..." : "บันทึกรูป (LINE)"}
                 </button>
                 <button
                     type="button"
                     onClick={handleGeneratePdf}
-                    disabled={isGenerating}
-                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
+                    disabled={isGeneratingPdf}
+                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
+                    title="ดาวน์โหลดเป็นไฟล์ PDF ความยาวพอดีเนื้อหา"
                 >
                     <Download className="w-4 h-4" />
-                    {isGenerating ? "กำลังสร้าง..." : "บันทึก PDF"}
+                    {isGeneratingPdf ? "กำลังสร้าง..." : "บันทึก PDF"}
+                </button>
+                <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm transition-colors"
+                >
+                    <Printer className="w-4 h-4" /> พิมพ์
                 </button>
             </div>
         </div>

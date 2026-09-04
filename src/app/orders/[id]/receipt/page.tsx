@@ -5,9 +5,9 @@ import { th } from "date-fns/locale";
 import { PrintButton } from "@/components/PrintButton";
 
 interface ReceiptPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function ReceiptPage({ params }: ReceiptPageProps) {
