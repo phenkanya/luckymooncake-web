@@ -17,7 +17,10 @@ export default async function StockPage() {
         }),
         prisma.product.findMany({
             where: { isActive: true },
-            orderBy: { name: 'asc' },
+            orderBy: [
+                { sortOrder: 'asc' },
+                { createdAt: 'asc' }
+            ],
             include: {
                 stock: true
             }

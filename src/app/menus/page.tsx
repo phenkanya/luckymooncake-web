@@ -1,63 +1,36 @@
 import { prisma } from "@/lib/prisma";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddMenuDialog } from "@/components/AddMenuDialog";
-import { EditMenuDialog } from "@/components/EditMenuDialog";
-import { DeleteMenuButton } from "@/components/DeleteMenuButton";
+import { MenusTable } from "@/components/MenusTable";
 
 export const dynamic = 'force-dynamic';
 
 export default async function MenusPage() {
+    try {
+        await prisma.$executeRawUnsafe(`ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "sortOrder" INTEGER DEFAULT 0;`);
+    } catch (e) {
+        // Table/column might already exist
+    }
+
     const products = await prisma.product.findMany({
-        orderBy: { createdAt: 'desc' }
+        orderBy: [
+            { sortOrder: 'asc' },
+            { createdAt: 'asc' }
+        ]
     });
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center bg-card p-6 rounded-xl border shadow-sm">
+        <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-xl border shadow-sm">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">จัดการเมนู (Menus)</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        เพิ่ม ลบ หรือแก้ไขแคตตาล็อกสินค้าที่คุณต้องการเปิดรับพรีออเดอร์
+                        เพิ่ม ลบ แก้ไข หรือจัดเรียงลำดับรายการขนมที่ต้องการเปิดรับพรีออเดอร์
                     </p>
                 </div>
                 <AddMenuDialog />
             </div>
 
-            <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                <Table>
-                    <TableHeader className="bg-muted/50">
-                        <TableRow>
-                            <TableHead>เมนู</TableHead>
-                            <TableHead className="text-right">ราคาขาย</TableHead>
-                            <TableHead className="text-right">จัดการ</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {products.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                                    ยังไม่มีข้อมูลเมนูในระบบ กรุณากด "เพิ่มเมนูใหม่"
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            products.map((product) => (
-                                <TableRow key={product.id} className="hover:bg-muted/30">
-                                    <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell className="text-right font-medium text-blue-600 dark:text-blue-400">
-                                        ฿{product.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <EditMenuDialog product={product} />
-                                            <DeleteMenuButton id={product.id} name={product.name} />
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+            <MenusTable products={products} />
         </div>
     );
 }
