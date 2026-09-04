@@ -148,7 +148,7 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
                         {order.note && (
                             <div className="mt-3.5 p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-xs text-amber-900">
                                 <span className="font-semibold block mb-0.5">📝 หมายเหตุ:</span>
-                                {order.note}
+                                <div className="whitespace-pre-line leading-relaxed">{order.note}</div>
                             </div>
                         )}
                     </div>

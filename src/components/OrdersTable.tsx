@@ -304,6 +304,11 @@ export function OrdersTable({ orders, activeProducts }: OrdersTableProps) {
                                                     📞 {order.customerPhone}
                                                 </div>
                                             )}
+                                            {order.note && (
+                                                <div className="text-[11px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/80 mt-1 truncate max-w-[180px]" title={order.note}>
+                                                    📝 {order.note}
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">

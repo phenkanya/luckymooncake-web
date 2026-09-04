@@ -11,6 +11,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2 } from "lucide-react";
 import { createOrder } from "@/app/actions/order-actions";
@@ -320,8 +321,8 @@ export function AddOrderDialog({ products }: AddOrderDialogProps) {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="note">หมายเหตุ <span className="text-muted-foreground text-xs">(ไม่บังคับ)</span></Label>
-                                <Input id="note" name="note" placeholder="เช่น ขอใบเสร็จ, ระวังแตก, ผูกโบว์ ฯลฯ" />
+                                <Label htmlFor="note">หมายเหตุ <span className="text-muted-foreground text-xs">(ไม่บังคับ, กด Enter ขึ้นบรรทัดใหม่ได้)</span></Label>
+                                <Textarea id="note" name="note" rows={3} placeholder="เช่น ขอใบเสร็จ, ระวังแตก, ผูกโบว์ ฯลฯ (เคาะขึ้นบรรทัดใหม่ได้)" />
                             </div>
                         </div>
                     </div>

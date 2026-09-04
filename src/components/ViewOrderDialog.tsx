@@ -129,8 +129,9 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
                             </span>
                         </div>
                         {order.note && (
-                            <div className="text-sm bg-yellow-50/50 text-yellow-800 p-2 rounded border border-yellow-100">
-                                <span className="font-medium">หมายเหตุ:</span> {order.note}
+                            <div className="text-sm bg-yellow-50/50 text-yellow-800 p-2.5 rounded border border-yellow-100">
+                                <span className="font-semibold block mb-0.5">📝 หมายเหตุ:</span>
+                                <div className="whitespace-pre-line leading-relaxed">{order.note}</div>
                             </div>
                         )}
                     </div>

@@ -78,7 +78,7 @@ function DispatchSection({ title, dateTitle, orders }: { title: string, dateTitl
                                                 ที่อยู่: {order.customerAddress || "-"}
                                             </div>
                                             {order.note && (
-                                                <div className="text-xs mt-2 bg-yellow-50 text-yellow-800 p-1 rounded border border-yellow-100 line-clamp-2">
+                                                <div className="text-xs mt-2 bg-yellow-50 text-yellow-800 p-1.5 rounded border border-yellow-100 whitespace-pre-line leading-snug">
                                                     📝 {order.note}
                                                 </div>
                                             )}

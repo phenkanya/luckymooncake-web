@@ -11,6 +11,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Edit2, Plus, Trash2, RefreshCw } from "lucide-react";
 import { updateOrder } from "@/app/actions/order-actions";
@@ -389,8 +390,8 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor={`note-${order.id}`}>หมายเหตุ <span className="text-muted-foreground text-xs">(ไม่บังคับ)</span></Label>
-                                <Input id={`note-${order.id}`} name="note" defaultValue={order.note || ""} placeholder="เช่น ขอใบเสร็จ, ระวังแตก, ผูกโบว์ ฯลฯ" />
+                                <Label htmlFor={`note-${order.id}`}>หมายเหตุ <span className="text-muted-foreground text-xs">(ไม่บังคับ, กด Enter ขึ้นบรรทัดใหม่ได้)</span></Label>
+                                <Textarea id={`note-${order.id}`} name="note" defaultValue={order.note || ""} rows={3} placeholder="เช่น ขอใบเสร็จ, ระวังแตก, ผูกโบว์ ฯลฯ (เคาะขึ้นบรรทัดใหม่ได้)" />
                             </div>
                         </div>
                     </div>
