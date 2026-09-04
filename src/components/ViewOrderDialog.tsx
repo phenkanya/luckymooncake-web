@@ -141,9 +141,9 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
                         <div className="space-y-2">
                             {order.items.map((item: OrderItem & { product: Product | null }) => (
                                 <div key={item.id} className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground mr-1">{item.quantity}x</span>
+                                    <span className="text-muted-foreground mr-1">{item.quantity.toLocaleString('th-TH')}x</span>
                                     <span className="flex-1">{item.product?.name || "สินค้าถูกลบ"}</span>
-                                    <span>฿{(item.price * item.quantity).toFixed(2)}</span>
+                                    <span>฿{(item.price * item.quantity).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             ))}
 
@@ -158,17 +158,17 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
                                             <>
                                                 <div className="flex justify-between text-muted-foreground">
                                                     <span>ราคารวมสินค้า</span>
-                                                    <span>฿{subtotal.toFixed(2)}</span>
+                                                    <span>฿{subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                 </div>
                                                 <div className="flex justify-between text-red-500 font-medium">
                                                     <span>ส่วนลด {discountPct > 0 ? `(${discountPct}%)` : ""}</span>
-                                                    <span>-฿{discount.toFixed(2)}</span>
+                                                    <span>-฿{discount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                 </div>
                                             </>
                                         )}
                                         <div className="flex justify-between font-bold text-primary text-base pt-1">
                                             <span>ยอดรวมทั้งสิ้น</span>
-                                            <span>฿{order.totalAmount.toFixed(2)}</span>
+                                            <span>฿{order.totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                     </div>
                                 );

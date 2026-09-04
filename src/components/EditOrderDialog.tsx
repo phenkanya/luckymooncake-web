@@ -339,17 +339,17 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
                             <div className="space-y-1.5 px-3 py-2.5 bg-muted/60 rounded-lg text-sm">
                                 <div className="flex justify-between text-muted-foreground">
                                     <span>ราคารวมสินค้า:</span>
-                                    <span>฿{itemsSubtotal.toFixed(2)}</span>
+                                    <span>฿{itemsSubtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                                 {discountAmount > 0 && (
                                     <div className="flex justify-between text-red-500 font-medium">
                                         <span>ส่วนลด ({discountPercent > 0 ? `${discountPercent.toFixed(0)}%` : "บาท"}):</span>
-                                        <span>-฿{discountAmount.toFixed(2)}</span>
+                                        <span>-฿{discountAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center font-bold text-base pt-1.5 border-t border-border/50">
                                     <span>ยอดรวมสุทธิ:</span>
-                                    <span className="text-lg text-primary">฿{grandTotal.toFixed(2)}</span>
+                                    <span className="text-lg text-primary">฿{grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             </div>
                         </div>
