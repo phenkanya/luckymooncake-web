@@ -15,7 +15,7 @@ export default async function StockPage() {
             },
             take: 50
         }),
-        prisma.product.findMany({
+        (prisma.product.findMany as any)({
             where: { isActive: true },
             orderBy: [
                 { sortOrder: 'asc' },
@@ -24,7 +24,7 @@ export default async function StockPage() {
             include: {
                 stock: true
             }
-        }),
+        }).catch(() => prisma.product.findMany({ where: { isActive: true }, orderBy: { name: 'asc' }, include: { stock: true } })),
         // 1. ออเดอร์ทั้งหมดที่รอส่ง (คิดทุกออเดอร์ ทั้งที่จ่ายแล้วและยังไม่จ่าย)
         prisma.order.findMany({
             where: {

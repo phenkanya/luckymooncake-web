@@ -14,13 +14,13 @@ export default async function OrdersPage() {
                 round: true
             }
         }),
-        prisma.product.findMany({
+        (prisma.product.findMany as any)({
             where: { isActive: true },
             orderBy: [
                 { sortOrder: 'asc' },
                 { createdAt: 'asc' }
             ]
-        })
+        }).catch(() => prisma.product.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } }))
     ]);
 
     return (

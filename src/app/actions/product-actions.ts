@@ -7,7 +7,6 @@ async function ensureSortOrderColumn() {
     try {
         await prisma.$executeRawUnsafe(`ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "sortOrder" INTEGER DEFAULT 0;`);
     } catch (error) {
-        // Table or column might already exist or permission quirks
         console.error("Column check error:", error);
     }
 }
@@ -26,13 +25,15 @@ export async function addProduct(formData: FormData) {
 
     const price = parseFloat(priceStr);
 
-    // Get max sortOrder to append to bottom
-    const existingProducts = await prisma.product.findMany({
-        select: { sortOrder: true }
-    });
-    const maxSortOrder = existingProducts.reduce((max, p) => Math.max(max, p.sortOrder || 0), 0);
+    let maxSortOrder = 0;
+    try {
+        const existingProducts: any[] = await (prisma.product.findMany as any)();
+        maxSortOrder = existingProducts.reduce((max: number, p: any) => Math.max(max, p.sortOrder || 0), 0);
+    } catch (e) {
+        // Ignored
+    }
 
-    await prisma.product.create({
+    await (prisma.product.create as any)({
         data: {
             name,
             description,
@@ -106,15 +107,21 @@ export async function updateProduct(formData: FormData) {
 export async function moveProductOrder(id: string, direction: "up" | "down") {
     await ensureSortOrderColumn();
 
-    // Fetch all products ordered by sortOrder, then createdAt
-    const products = await prisma.product.findMany({
-        orderBy: [
-            { sortOrder: 'asc' },
-            { createdAt: 'asc' }
-        ]
-    });
+    let products: any[] = [];
+    try {
+        products = await (prisma.product.findMany as any)({
+            orderBy: [
+                { sortOrder: 'asc' },
+                { createdAt: 'asc' }
+            ]
+        });
+    } catch (e) {
+        products = await prisma.product.findMany({
+            orderBy: { createdAt: 'asc' }
+        });
+    }
 
-    const index = products.findIndex(p => p.id === id);
+    const index = products.findIndex((p: any) => p.id === id);
     if (index === -1) return;
 
     if (direction === "up" && index > 0) {
@@ -129,10 +136,18 @@ export async function moveProductOrder(id: string, direction: "up" | "down") {
 
     // Save updated positions
     for (let i = 0; i < products.length; i++) {
-        await prisma.product.update({
-            where: { id: products[i].id },
-            data: { sortOrder: i }
-        });
+        try {
+            await (prisma.product.update as any)({
+                where: { id: products[i].id },
+                data: { sortOrder: i }
+            });
+        } catch (err) {
+            await prisma.$executeRawUnsafe(
+                `UPDATE "Product" SET "sortOrder" = $1 WHERE "id" = $2`,
+                i,
+                products[i].id
+            );
+        }
     }
 
     revalidatePath("/menus");

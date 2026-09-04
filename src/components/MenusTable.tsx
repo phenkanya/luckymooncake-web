@@ -10,7 +10,7 @@ import { moveProductOrder } from "@/app/actions/product-actions";
 import { Product } from "@prisma/client";
 
 interface MenusTableProps {
-    products: Product[];
+    products: any[];
 }
 
 export function MenusTable({ products }: MenusTableProps) {

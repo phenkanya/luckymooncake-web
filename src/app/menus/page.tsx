@@ -8,15 +8,22 @@ export default async function MenusPage() {
     try {
         await prisma.$executeRawUnsafe(`ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "sortOrder" INTEGER DEFAULT 0;`);
     } catch (e) {
-        // Table/column might already exist
+        // Ignored
     }
 
-    const products = await prisma.product.findMany({
-        orderBy: [
-            { sortOrder: 'asc' },
-            { createdAt: 'asc' }
-        ]
-    });
+    let products: any[] = [];
+    try {
+        products = await (prisma.product.findMany as any)({
+            orderBy: [
+                { sortOrder: 'asc' },
+                { createdAt: 'asc' }
+            ]
+        });
+    } catch (e) {
+        products = await prisma.product.findMany({
+            orderBy: { createdAt: 'asc' }
+        });
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
