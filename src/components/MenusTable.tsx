@@ -7,7 +7,6 @@ import { EditMenuDialog } from "@/components/EditMenuDialog";
 import { DeleteMenuButton } from "@/components/DeleteMenuButton";
 import { ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import { moveProductOrder } from "@/app/actions/product-actions";
-import { Product } from "@prisma/client";
 
 interface MenusTableProps {
     products: any[];
