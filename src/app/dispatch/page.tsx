@@ -88,11 +88,15 @@ function DispatchSection({ title, dateTitle, orders }: { title: string, dateTitl
                                             <div className="flex items-center gap-2">
                                                 <span className="font-bold">{order.customerName}</span>
                                                 {order.paymentStatus === "PAID" ? (
-                                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-600 font-medium border border-emerald-200">
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-medium border border-emerald-200">
                                                         จ่ายแล้ว
                                                     </span>
+                                                ) : order.paymentStatus === "DEPOSIT_50" ? (
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-medium border border-blue-200">
+                                                        มัดจำ 50%
+                                                    </span>
                                                 ) : (
-                                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-600 font-medium border border-amber-200">
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 font-medium border border-amber-200">
                                                         รอชำระ
                                                     </span>
                                                 )}

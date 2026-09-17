@@ -211,7 +211,8 @@ export function OrdersTable({ orders, activeProducts }: OrdersTableProps) {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="ALL">สถานะชำระ: ทั้งหมด</SelectItem>
-                                <SelectItem value="PAID">ชำระแล้ว</SelectItem>
+                                <SelectItem value="PAID">ชำระครบแล้ว</SelectItem>
+                                <SelectItem value="DEPOSIT_50">มัดจำ 50% แล้ว</SelectItem>
                                 <SelectItem value="UNPAID">รอชำระเงิน</SelectItem>
                             </SelectContent>
                         </Select>
@@ -356,6 +357,15 @@ export function OrdersTable({ orders, activeProducts }: OrdersTableProps) {
                                                 <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50">
                                                     ชำระแล้ว
                                                 </Badge>
+                                            ) : order.paymentStatus === "DEPOSIT_50" ? (
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                    <Badge variant="outline" className="border-blue-500 text-blue-700 bg-blue-50">
+                                                        มัดจำ 50%
+                                                    </Badge>
+                                                    <span className="text-[10px] text-blue-600 font-medium">
+                                                        (เหลือ ฿{(order.totalAmount * 0.5).toLocaleString('th-TH')})
+                                                    </span>
+                                                </div>
                                             ) : (
                                                 <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50">
                                                     รอชำระเงิน

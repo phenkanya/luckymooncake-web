@@ -71,6 +71,7 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
     const getPaymentBadge = (s: string) => {
         switch (s) {
             case "PAID": return <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50">ชำระแล้ว</Badge>;
+            case "DEPOSIT_50": return <Badge variant="outline" className="border-blue-500 text-blue-700 bg-blue-50">มัดจำ 50%</Badge>;
             default: return <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50">รอชำระเงิน</Badge>;
         }
     }
@@ -171,6 +172,19 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
                                             <span>ยอดรวมทั้งสิ้น</span>
                                             <span>฿{order.totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
+
+                                        {order.paymentStatus === "DEPOSIT_50" && (
+                                            <div className="mt-2 p-2 bg-blue-50/80 rounded-md border border-blue-200/80 text-xs space-y-1">
+                                                <div className="flex justify-between text-emerald-700 font-medium">
+                                                    <span>• ยอดมัดจำ 50% (ชำระแล้ว):</span>
+                                                    <span>฿{(order.totalAmount * 0.5).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                </div>
+                                                <div className="flex justify-between text-blue-700 font-medium">
+                                                    <span>• คงเหลือชำระวันรับของ:</span>
+                                                    <span>฿{(order.totalAmount * 0.5).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })()}
@@ -189,7 +203,8 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="UNPAID">ยังไม่จ่าย</SelectItem>
-                                        <SelectItem value="PAID">จ่ายแล้ว</SelectItem>
+                                        <SelectItem value="DEPOSIT_50">มัดจำ 50% แล้ว</SelectItem>
+                                        <SelectItem value="PAID">จ่ายเต็มจำนวนแล้ว</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

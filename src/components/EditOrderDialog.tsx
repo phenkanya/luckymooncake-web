@@ -106,6 +106,7 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
 
     const [discountMode, setDiscountMode] = useState<"NONE" | "5" | "10" | "15" | "20" | "CUSTOM_PERCENT" | "CUSTOM_AMOUNT">(initialMode);
     const [customDiscountValue, setCustomDiscountValue] = useState<number>(initialCustom);
+    const [paymentStatus, setPaymentStatus] = useState<string>(order.paymentStatus || "UNPAID");
 
     const itemsSubtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -143,6 +144,7 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
         setLoading(true);
         formData.append("orderId", order.id);
         formData.append("items", JSON.stringify(items));
+        formData.set("paymentStatus", paymentStatus);
 
         if (discountPercent > 0) {
             formData.append("discountPercent", discountPercent.toString());
@@ -352,6 +354,22 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
                                     <span>ยอดรวมสุทธิ:</span>
                                     <span className="text-lg text-primary">฿{grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
+
+                                {paymentStatus === "DEPOSIT_50" && (
+                                    <div className="mt-2 p-2.5 bg-blue-50/80 dark:bg-blue-950/40 rounded-lg border border-blue-200/80 dark:border-blue-900/60 text-xs space-y-1">
+                                        <div className="font-semibold text-blue-900 dark:text-blue-300">
+                                            🏷️ สรุปยอดมัดจำ 50%:
+                                        </div>
+                                        <div className="flex justify-between text-emerald-700 dark:text-emerald-400 font-medium">
+                                            <span>• มัดจำ 50% (ชำระแล้ว):</span>
+                                            <span>฿{(grandTotal * 0.5).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex justify-between text-blue-700 dark:text-blue-400 font-medium">
+                                            <span>• ยอดคงเหลือ (ชำระวันรับของ):</span>
+                                            <span>฿{(grandTotal * 0.5).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         {/* Extra Details */}
@@ -364,13 +382,14 @@ export function EditOrderDialog({ order, products }: EditOrderDialogProps) {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor={`paymentStatus-${order.id}`}>สถานะการชำระเงิน <span className="text-red-500">*</span></Label>
-                                    <Select name="paymentStatus" defaultValue={order.paymentStatus}>
+                                    <Select name="paymentStatus" value={paymentStatus} onValueChange={setPaymentStatus}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="เลือกการชำระเงิน..." />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="UNPAID">ยังไม่จ่าย</SelectItem>
-                                            <SelectItem value="PAID">จ่ายแล้ว</SelectItem>
+                                            <SelectItem value="DEPOSIT_50">มัดจำ 50% แล้ว</SelectItem>
+                                            <SelectItem value="PAID">จ่ายเต็มจำนวนแล้ว</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

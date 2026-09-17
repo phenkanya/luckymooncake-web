@@ -94,7 +94,7 @@ export async function updateOrderStatus(orderId: string, paymentStatus: string, 
     if (!existingOrder) throw new Error("Order not found");
 
     // If order is newly marked as SHIPPED, deduct from stock automatically
-    if (existingOrder.shippingStatus !== "SHIPPED" && shippingStatus === "SHIPPED" && existingOrder.paymentStatus === "PAID") {
+    if (existingOrder.shippingStatus !== "SHIPPED" && shippingStatus === "SHIPPED" && (paymentStatus === "PAID" || paymentStatus === "DEPOSIT_50" || existingOrder.paymentStatus === "PAID" || existingOrder.paymentStatus === "DEPOSIT_50")) {
         for (const item of existingOrder.items) {
             if (item.productId) {
                 await prisma.stockEntry.create({
@@ -186,7 +186,7 @@ export async function updateOrder(formData: FormData) {
 
     // If order is newly marked as SHIPPED, deduct from stock automatically
     // (We do this after updating the order so the items are fresh, but we use the new items)
-    if (existingOrder.shippingStatus !== "SHIPPED" && shippingStatus === "SHIPPED" && paymentStatus === "PAID") {
+    if (existingOrder.shippingStatus !== "SHIPPED" && shippingStatus === "SHIPPED" && (paymentStatus === "PAID" || paymentStatus === "DEPOSIT_50" || existingOrder.paymentStatus === "PAID" || existingOrder.paymentStatus === "DEPOSIT_50")) {
         for (const item of items) {
             if (item.productId) {
                 await prisma.stockEntry.create({
