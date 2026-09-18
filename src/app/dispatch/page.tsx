@@ -142,11 +142,14 @@ function DispatchSection({ title, dateTitle, orders }: { title: string, dateTitl
 }
 
 export default async function DispatchPage() {
-    // 1. ดึงออเดอร์ทั้งหมดที่ยังไม่จัดส่ง (รวมทั้งที่จ่ายแล้วและยังไม่จ่าย เพื่อให้เห็นแผนการจัดส่งล่วงหน้าครบถ้วน)
+    // 1. ดึงออเดอร์ทั้งหมดที่ยังไม่จัดส่ง และมีการระบุวันที่จัดส่ง
     const activeOrders = await prisma.order.findMany({
         where: {
             shippingStatus: {
                 not: "SHIPPED"
+            },
+            deliveryDate: {
+                not: null
             }
         },
         include: {
@@ -192,9 +195,9 @@ export default async function DispatchPage() {
     const in3DaysStr = getThaiDateString(in3Days);
 
     // Split orders into 4 target sections + future section
-    // 1. วันนี้ (รวมออเดอร์ที่ deliveryDate <= วันนี้ หรือไม่ได้ระบุวัน)
+    // 1. วันนี้ (ออเดอร์ที่ deliveryDate <= วันนี้)
     const todayOrders = activeOrders.filter((o: any) =>
-        !o.deliveryDate || getThaiDateString(o.deliveryDate) <= todayStr
+        o.deliveryDate && getThaiDateString(o.deliveryDate) <= todayStr
     );
 
     // 2. พรุ่งนี้ (+1 วัน)
